@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom'
 
 const NavBar = ({ totalCounters }) => {
 
@@ -6,12 +7,12 @@ const NavBar = ({ totalCounters }) => {
 
   return (
     <nav className="navbar navbar-light bg-light">
-      <a className="navbar-brand" href="#">
+      <Link to="/" className="navbar-brand">
         Cool React App{" "}
         <span className="badge badge-pill badge-secondary">
           {totalCounters}
         </span>
-      </a>
+      </Link>
     </nav>
   );
 };

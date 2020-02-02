@@ -1,20 +1,16 @@
 import React, { Component } from "react";
 import "./App.css";
 import NavBar from "./components/navbar.jsx";
-import Counters from "./components/counters";
+import Home from "./components/home";
+import Gist from "./components/gist";
+import SideBar from "./components/sidebar";
+import { Route, BrowserRouter } from 'react-router-dom'
 
 class App extends Component {
 
   constructor() {
     super();
-    console.log('App - Constructor');
   }
-
-  componentDidMount() {
-    console.log('App - Mounted');
-  }
-
-
 
   state = {
     counters: [
@@ -22,8 +18,17 @@ class App extends Component {
       { id: 2, value: 0 },
       { id: 3, value: 3 },
       { id: 4, value: 2 }
-    ]
+    ],
+    gists: null
   };
+
+  componentDidMount() {
+    fetch('https://api.github.com/gists')
+      .then(res => res.json())
+      .then(gists => {
+        this.setState({ gists });
+      });
+  }
 
   handleDelete = counterId => {
     const counters = this.state.counters.filter(c => c.id !== counterId);
@@ -52,22 +57,50 @@ class App extends Component {
 
   render() {
 
-    console.log('App - Rendered');
-
     return (
-      <React.Fragment>
-        <NavBar
-          totalCounters={this.state.counters.map(a => a.value).reduce((accumulator, currentValue) => accumulator + currentValue)}
-        />
-        <main className="container">
-          <Counters
-            counters={this.state.counters}
-            onReset={this.handleReset}
-            onDelete={this.handleDelete}
-            onIncrement={this.handleIncrement}
+      <BrowserRouter>
+        <React.Fragment>
+          <NavBar
+            totalCounters={this.state.counters.map(a => a.value).reduce((accumulator, currentValue) => accumulator + currentValue)}
           />
-        </main>
-      </React.Fragment>
+
+          <div className="d-flex" id="wrapper">
+            <SideBar gists={this.state.gists} />
+
+            <div id="page-content-wrapper">
+            
+              <div className="container-fluid">
+
+                <Route path="/" exact={true} render={(props) => 
+                  <Home
+                    {...props}
+                    counters={this.state.counters}
+                    onReset={this.handleReset}
+                    onDelete={this.handleDelete}
+                    onIncrement={this.handleIncrement} />
+                }/>
+
+                {this.state.gists && (
+                  <Route path="/g/:gistId" render={(props) => {
+                    return (
+                      <Gist {...props} gist={this.state.gists.filter(g => g.id === props.match.params.gistId )[0]} />
+                    )}
+                  }/>
+                )}
+
+                
+              {/* <Counters
+    counters={this.state.counters}
+    onReset={this.handleReset}
+    onDelete={this.handleDelete}
+    onIncrement={this.handleIncrement}
+  /> */}
+
+              </div>
+            </div>
+          </div>
+        </React.Fragment>
+      </BrowserRouter>
     );
   }
 }
